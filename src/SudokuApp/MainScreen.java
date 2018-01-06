@@ -1,8 +1,8 @@
 package SudokuApp;
 
-import sun.applet.Main;
-
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,35 +14,59 @@ public class MainScreen extends JFrame {
     private JButton start = new JButton("Start");
     private JButton load = new JButton("Load");
     private JButton back = new JButton("Back");
-    private JTextField gameField;
+    private JTable gameField = new JTable(9,9);
 
     MainScreen(){
         setTitle("Sudoku");
-        setBackground(Color.cyan);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300,500);
-        start.setSize(100,50);
-        load.setSize(100,50);
-        start.setBorderPainted(false);
-        start.setBackground(Color.cyan);
+        setSize(300,400);
 
-        gameField = new JTextField ("", 9);
+        start.setSize(100,50);
+        start.setBackground(Color.white);
         start.addActionListener(new StartEvent());
+        start.setBorderPainted(false);
+
+        load.setSize(100,50);
+        load.setBackground(Color.white);
+        load.addActionListener(new LoadEvent());
+        load.setBorderPainted(false);
+
+        back.setSize(100,50);
+        back.setBackground(Color.white);
+        back.setBorderPainted(false);
         back.addActionListener(new BackEvent());
 
-//        panel1.setLayout(new BorderLayout());
-        panel1.setLayout(new FlowLayout(FlowLayout.LEADING,110,100));
+        gameField.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int i = 0; i < gameField.getColumnCount();i++){
+            TableColumn column = gameField.getColumnModel().getColumn(i);
+            column.setPreferredWidth(30);
+            for (int j = 0; j < gameField.getRowCount();j++){
+                gameField.setRowHeight(j, 30);
+            }
+        }
+//        gameField.setSize(270,360);
+        gameField.setBackground(Color.white);
+
+        Border compound, bevel1, bevel2;
+        bevel1 = BorderFactory.createRaisedBevelBorder();
+        bevel2 = BorderFactory.createLoweredBevelBorder();
+        compound = BorderFactory.createCompoundBorder(bevel1, bevel2);
+        gameField.setBorder(compound);
+//        gameField.addAncestorListener();
+
+        panel1.setLayout(new FlowLayout(FlowLayout.CENTER,100,50));
         panel1.add(start);
         panel1.add(load);
+        panel1.setBackground(Color.white);
 
-        panel2.setLayout(new GridLayout(10, 9));
+//        panel2.setLayout(new GridLayout(3,3));
+        panel2.setLayout(new FlowLayout(FlowLayout.CENTER,0,20));
         panel2.add(gameField);
-        gameField.setSize(2,2);
         panel2.add(back);
+        panel2.setBackground(Color.white);
 
         setContentPane(panel2);
         setContentPane(panel1);
-
     }
 
     class StartEvent implements ActionListener{
@@ -64,6 +88,12 @@ public class MainScreen extends JFrame {
             panel1.setVisible(true);
             panel2.setVisible(false);
             setContentPane(panel1);
+            repaint();
+        }
+    }
+
+    class SetNumber implements ActionListener{
+        public void actionPerformed(ActionEvent e){
             repaint();
         }
     }

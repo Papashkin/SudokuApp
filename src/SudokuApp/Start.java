@@ -1,6 +1,7 @@
 package SudokuApp;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class Start {
 
