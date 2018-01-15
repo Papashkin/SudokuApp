@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import javax.swing.text.TableView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,7 +30,8 @@ public class MainScreen extends JFrame {
         }
     };
     private int selected = 0;
-    private Font bigFont = new Font("Gothic", Font.BOLD, 24);
+    private Font bigFont = new Font("Arial", Font.BOLD, 24);
+    private Font numberFont = new Font("Arial", Font.BOLD, 18);
 
     MainScreen(){
         setTitle("Sudoku");
@@ -59,6 +61,7 @@ public class MainScreen extends JFrame {
             column.setPreferredWidth(28);
             for (int j = 0; j < gameField.getRowCount();j++){
                 gameField.setRowHeight(j, 28);
+                gameField.setFont(numberFont);
             }
         }
         gameField.setBackground(Color.white);
@@ -79,6 +82,7 @@ public class MainScreen extends JFrame {
             a.setPreferredWidth(28);
         }
         number_row.setRowHeight(28);
+        number_row.setFont(numberFont);
         number_row.setColumnSelectionAllowed(true);
         number_row.setRowSelectionAllowed(true);
         number_row.enableInputMethods(true);
@@ -132,5 +136,9 @@ public class MainScreen extends JFrame {
         public void actionPerformed(ActionEvent e){
             repaint();
         }
+    }
+
+    public void fillTheTable(int levelIndex){
+
     }
 }
