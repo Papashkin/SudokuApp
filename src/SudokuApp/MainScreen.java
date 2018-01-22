@@ -2,6 +2,7 @@ package SudokuApp;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
@@ -16,10 +17,10 @@ public class MainScreen extends JFrame {
     private JButton load = new JButton("Load");
     private JButton back = new JButton("Back");
     private JTable gameField = new JTable(9,9){
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return false;
-        }
+//        @Override
+//        public boolean isCellEditable(int rowIndex, int columnIndex) {
+//            return false;
+//        }
     };
     private JLabel number_title = new JLabel("Числа для заполнения:");
     private JTable number_row = new JTable(1,9){
@@ -28,7 +29,8 @@ public class MainScreen extends JFrame {
             return false;
         }
     };
-    private int selected = 0;
+    private int selected = 10;
+    private int lvl = 10;
     private Font bigFont = new Font("Arial", Font.BOLD, 24);
     private Font numberFont = new Font("Arial", Font.BOLD, 18);
 
@@ -39,21 +41,13 @@ public class MainScreen extends JFrame {
         setLocation(200,100);
         setResizable(false);
 
-        start.setSize(100,50);
-        start.setBackground(Color.white);
-        start.setFont(bigFont);
+        setBtnParameters(start, bigFont);
         start.addActionListener(new StartEvent());
-        start.setBorderPainted(false);
 
-        load.setSize(100,50);
-        load.setFont(bigFont);
-        load.setBackground(Color.white);
+        setBtnParameters(load,bigFont);
         load.addActionListener(new LoadEvent());
-        load.setBorderPainted(false);
 
-        back.setSize(100,50);
-        back.setBackground(Color.white);
-        back.setBorderPainted(false);
+        setBtnParameters(back,bigFont);
         back.addActionListener(new BackEvent());
 
         setParameters(gameField, numberFont);
@@ -61,9 +55,11 @@ public class MainScreen extends JFrame {
             TableColumn column = gameField.getColumnModel().getColumn(i);
             column.setPreferredWidth(30);
             for (int j = 0; j < gameField.getRowCount();j++){
-                column.setCellRenderer(new JustCellRenderer(i,j));
+//                column.setCellRenderer(new JustCellRenderer(i,j));
             }
         }
+        setTheField(0);
+        gameField.setFillsViewportHeight(true);
 
         setParameters(number_row, numberFont);
         number_row.enableInputMethods(true);
@@ -95,12 +91,21 @@ public class MainScreen extends JFrame {
         setContentPane(panel1);
     }
 
-    class StartEvent implements ActionListener{
+    class StartEvent extends Component implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            panel1.setVisible(false);
-            panel2.setVisible(true);
-            setContentPane(panel2);
-            repaint();
+            Object[] level = {"Easy", "Normal", "Hard"};
+            JOptionPane dialogPane = new JOptionPane();
+            dialogPane.setLocation(100,200);
+            lvl = dialogPane.showOptionDialog(this,"Choose the level",
+                    "Levels",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,
+                    null,level,10);
+            if (lvl == 0 || lvl == 1 || lvl == 2) {
+                setTheField(lvl);
+                panel1.setVisible(false);
+                panel2.setVisible(true);
+                panel2.repaint();
+                setContentPane(panel2);
+            }
         }
     }
 
@@ -119,11 +124,35 @@ public class MainScreen extends JFrame {
         }
     }
 
-//    class SetNumber implements ActionListener{
-//        public void actionPerformed(ActionEvent e){
-//            repaint();
-//        }
-//    }
+    private void setTheField(int lvl){
+        int columns = gameField.getColumnCount();
+        int rows = gameField.getRowCount();
+        int[] aRow = {1,2,3,4,5,6,7,8,9};
+        for (int j = 0; j < columns; j++){
+            gameField.setValueAt(aRow[j],0,j);
+        }
+        for (int i = 1; i < rows; i++){
+            if (i == 3 || i == 6){
+                aRow = shiftLeft(aRow, 1);
+            }
+            aRow = shiftLeft(aRow, 3);
+            for (int j = 0; j < columns; j++){
+                gameField.setValueAt(aRow[j],i,j);
+            }
+        }
+    }
+
+    public int[] shiftLeft (int[] vector, int shiftCount){
+        int index = shiftCount - 1;
+        int[] vectorEnd = new int[vector.length];
+        for (int j = 0 ;j < shiftCount;j++){
+            vectorEnd[j+(vector.length)-shiftCount] = vector[j];
+        }
+        for (int j = 0;j < (vector.length)-shiftCount;j++){
+            vectorEnd[j] = vector[j+shiftCount];
+        }
+        return vectorEnd;
+    }
 
     private static void setParameters(JTable table, Font aFont){
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -137,11 +166,14 @@ public class MainScreen extends JFrame {
         cellRenderer.setHorizontalAlignment(SwingConstants.CENTER);
     }
 
+    private static void setBtnParameters(JButton button, Font aFont){
+        button.setSize(100,50);
+        button.setBackground(Color.white);
+        button.setFont(aFont);
+        button.setBorderPainted(false);
+    }
+
     public class JustCellRenderer extends JLabel implements TableCellRenderer{
-
-        public JustCellRenderer(int columnIndex, int rowIndex){
-        }
-
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                        boolean hasFocus, int row, int column) {
@@ -161,6 +193,9 @@ public class MainScreen extends JFrame {
             }
             setHorizontalAlignment(SwingConstants.CENTER);
             return this;
+        }
+
+        public JustCellRenderer(int columnIndex, int rowIndex){
         }
     }
 }
