@@ -5,6 +5,8 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class MainScreen extends JFrame{
 
@@ -24,16 +26,15 @@ public class MainScreen extends JFrame{
     };
 
     private JLabel number_title = new JLabel("Числа для заполнения:");
-    private JTable number_row = new JTable(1,9){
+    private JTable numberTab = new JTable(1,9){
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
             return false;
         }
     };
-    private int selected = 10;
+    private int selectedValue = 0;
     private int lvl = 10;                   // complication level;
-    private int[][] sudoku = new int[9][9]; // sudoku matrix;
-//    private SudokuMatrix sudoku2 = new SudokuMatrix();  //alternative variant of the sudoku matrix
+    private Sudoku sudoku = new Sudoku(9,9);
 
     private Font bigFont = new Font("Arial", Font.BOLD, 24);
     private Font numberFont = new Font("Arial", Font.BOLD, 18);
@@ -54,27 +55,25 @@ public class MainScreen extends JFrame{
         setBtnParameters(back,bigFont);
         back.addActionListener(new BackEvent());
 
-        setParameters(gameField, numberFont);
-        setParameters(number_row, numberFont);
-        for (int i = 0; i < number_row.getColumnCount();i++){
-            number_row.isCellEditable(0, i);
-            number_row.setValueAt(i+1,0,i);
+        setTableParameters(gameField, numberFont);
+        gameField.addMouseListener(new SudokuClick());
+
+        setTableParameters(numberTab, numberFont);
+        for (int i = 0; i < numberTab.getColumnCount();i++){
+            numberTab.isCellEditable(0, i);
+            numberTab.setValueAt(i+1,0,i);
         }
+        numberTab.addMouseListener(new NumberChoice());
 
         mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER,100,110));
         mainPanel.add(start);
         mainPanel.add(load);
         mainPanel.setBackground(Color.white);
 
-//        levelPanel.setLayout(new FlowLayout(FlowLayout.CENTER,100,110));
-//        levelPanel.add(start);
-//        levelPanel.add(load);
-//        levelPanel.setBackground(Color.white);
-
         gamePanel.setLayout(new FlowLayout(FlowLayout.CENTER,0,15));
         gamePanel.add(gameField);
         gamePanel.add(number_title);
-        gamePanel.add(number_row);
+        gamePanel.add(numberTab);
         gamePanel.add(back);
         gamePanel.setBackground(Color.white);
 
@@ -91,8 +90,8 @@ public class MainScreen extends JFrame{
                     null,level,10);
             if (lvl == 0 || lvl == 1 || lvl == 2) {
                 generateSudoku(gameField, lvl);
-                setContentPane(gamePanel);
                 gamePanel.repaint();
+                setContentPane(gamePanel);
             }
         }
     }
@@ -102,9 +101,45 @@ public class MainScreen extends JFrame{
         }
     }
 
+    class NumberChoice implements MouseListener{
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            for (int i = 0; i < numberTab.getColumnCount();i++){
+                if (numberTab.isCellSelected(0,i)){
+                    selectedValue = (int) numberTab.getValueAt(0,i);
+                }
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) { }
+        @Override
+        public void mouseReleased(MouseEvent e) { }
+        @Override
+        public void mouseEntered(MouseEvent e) { }
+        @Override
+        public void mouseExited(MouseEvent e) { }
+    }
+
+    class SudokuClick implements MouseListener{
+        @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) { }
+        @Override
+        public void mouseReleased(MouseEvent e) { }
+        @Override
+        public void mouseEntered(MouseEvent e) { }
+        @Override
+        public void mouseExited(MouseEvent e) { }
+    }
+
     class BackEvent implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            number_row.clearSelection();
+            numberTab.clearSelection();
             gameField.clearSelection();
             setContentPane(mainPanel);
         }
@@ -113,11 +148,9 @@ public class MainScreen extends JFrame{
     private void generateSudoku(JTable table, int lvl){
         int columns = table.getColumnCount();
         int rows = table.getRowCount();
-//        sudoku2.restart();
         int[] aRow = {1,2,3,4,5,6,7,8,9};
         for (int j = 0; j < columns; j++){
-            sudoku[0][j] = aRow[j];
-//            sudoku2.setValue(0,j,aRow[j]);
+            sudoku.setValue(0,j,aRow[j]);
         }
         for (int i = 1; i < rows; i++){
             if (i == 3 || i == 6){
@@ -125,94 +158,40 @@ public class MainScreen extends JFrame{
             }
             aRow = shiftLeft(aRow, 3);
             for (int j = 0; j < columns; j++){
-                sudoku[i][j] =  aRow[j];
-//                sudoku2.setValue(i,j,aRow[j]);
+                sudoku.setValue(i,j,aRow[j]);
             }
         }
-        sudoku = transpose(sudoku, Math.random());
-        sudoku = overturn(sudoku, Math.random());
-        sudoku = swapRowsArea(sudoku,6*Math.random());
 
-//        sudoku2.transpose(Math.random());
-//        sudoku2.overturn(Math.random());
+        sudoku.transpose(Math.random());
+        sudoku.overturn(Math.random());
+        sudoku.swapRowsArea(2);
+        sudoku.swapColsArea(2);
 
-        for (int row = 0;row < sudoku.length;row++){
-            for (int col = 0;col < sudoku[0].length;col++){
-                table.setValueAt(sudoku[row][col],row,col);
+        for (int row = 0;row < sudoku.rowLength();row++){
+            for (int col = 0;col < sudoku.columnLength();col++){
+                table.setValueAt(sudoku.getValue(row,col), row,col);
             }
         }
-//        for (int row = 0;row < sudoku2.rowLength();row++){
-//            for (int col = 0;col < sudoku2.columnLength();col++){
-//                table.setValueAt((sudoku2.getValue(row,col)),row,col);
-//            }
-//        }
-
         table.repaint();
     }
 
-    public int[][] swapRowsArea (int[][] iSudoku, double random){               // Method allows to swap areas in horizontal
-        int area1, area2;
-        int[][] oSudoku = iSudoku.clone();
-        int count = (int) random;
-        for (int step = 0; step < count; step ++){
-            area1 = (int)(3*Math.random());
-            do{
-                area2 = (int)(3*Math.random());
-            }
-            while (area2 == area1);
-            area1 = area1*3;
-            area2 = area2*3;
-            for (int row = 0;row < 3;row++){
-                for (int col = 0;col < iSudoku[0].length;col++){
-                    int val = iSudoku[area1+row][col];
-                    oSudoku[area1+row][col] = iSudoku[area2+row][col];
-                    oSudoku[area2+row][col] = val;
-                }
-            }
-        }
-        return oSudoku;
-    }
-
-    public int[][] transpose(int[][] iSudoku, double random){   // Method allows to transpose the sudoku matrix.
-        if (random > 0.5d){
-            int row = iSudoku.length;
-            int col = iSudoku[0].length;
-            int[][] oSudoku = new int[row][col];
-            for (int i = 0; i < row;i++){
-                for (int j = 0; j < col;j++){
-                    oSudoku[j][i] = iSudoku[i][j];
-                }
-            }
-            return oSudoku;
-        } else { return iSudoku;}
-    }
-
-    public int[][] overturn(int[][] iSudoku, double random){   // Method allows to overturn the sudoku matrix.
-        if (random > 0.5d){
-            int row = iSudoku.length;
-            int col = iSudoku[0].length;
-            int[][] oSudoku = new int[row][col];
-            for (int i = 0; i < row;i++){
-                for (int j = 0; j < col;j++){
-                    oSudoku[col-i-1][j] = iSudoku[i][j];
-                }
-            }
-            return oSudoku;
-        } else { return iSudoku;}
-    }
-
-    public int[] shiftLeft (int[] vector, int shiftCount){
-        int[] vectorEnd = new int[vector.length];
+    private int[] shiftLeft (int[] inVector, int shiftCount){      //shift the number vector to the left by shiftCount value
+        int[] outVector = new int[inVector.length];
         for (int j = 0 ;j < shiftCount;j++){
-            vectorEnd[j+(vector.length)-shiftCount] = vector[j];
+            outVector[j+(inVector.length)-shiftCount] = inVector[j];
         }
-        for (int j = 0;j < (vector.length)-shiftCount;j++){
-            vectorEnd[j] = vector[j+shiftCount];
+        for (int j = 0;j < (inVector.length)-shiftCount;j++){
+            outVector[j] = inVector[j+shiftCount];
         }
-        return vectorEnd;
+        return outVector;
     }
 
-    private void setParameters(JTable table, Font aFont){
+    private boolean isCorrectChoise(JTable table, int aValue){
+        boolean isCorrect = false;
+        return isCorrect;
+    }
+
+    private void setTableParameters(JTable table, Font aFont){
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.setBackground(Color.white);
         table.setBorder(BorderFactory.createMatteBorder(2,2,2,2, Color.black));
@@ -223,7 +202,7 @@ public class MainScreen extends JFrame{
             tabCol.setPreferredWidth(30);
             if (table.getRowCount() != 1){
                 for (int j = 0; j < table.getRowCount(); j++) {
-                    tabCol.setCellRenderer(new SudokuCellRenderer(i,j));
+                    tabCol.setCellRenderer(new SudokuCellRenderer(i,j,0));
                 }
             }
         }

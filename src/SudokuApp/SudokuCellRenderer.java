@@ -5,7 +5,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
 public class SudokuCellRenderer extends DefaultTableCellRenderer {
-    Font font = new Font("Arial", Font.BOLD, 18);
+    Font font = new Font("Arial", Font.BOLD,18);
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -25,22 +25,45 @@ public class SudokuCellRenderer extends DefaultTableCellRenderer {
                 }
             }
             setHorizontalAlignment(SwingConstants.CENTER);
-//        setFocusable(hasFocus);
-        setValue(value);
+            if (0 != (int)value){
+                setValue(value);
+            } else value = null;
+            if (!isUnique(table, row, column, (int)value)){
+            setForeground(Color.red);
+            } else setForeground(Color.black);
         setFont(font);
         if (isSelected){
-            hasFocus = true;
-            setBackground(Color.gray);
-        }else {
-            setBackground(Color.white);
-            hasFocus = false;
-        }
-        setFocusable(hasFocus);
-
+            setForeground(Color.red);
+        } else setForeground(Color.black);
         return this;
     }
 
-    public SudokuCellRenderer(int column, int row){
-        repaint();
+    public SudokuCellRenderer(int column, int row, int value){
+    }
+
+    private boolean isUnique (JTable table, int row, int col, int value){
+        boolean unique = true;
+        int i = 0;
+        int j = 0;
+        int scndValue;
+        do{
+            if (i < table.getRowCount()){
+                scndValue = (int) table.getValueAt(i, col);
+                if (scndValue == value && i != row){
+                    unique = false;
+                    break;
+                }
+            }
+            if (j < table.getColumnCount()){
+                scndValue = (int) table.getValueAt(row, j);
+                if (scndValue == value && j != col){
+                    unique = false;
+                    break;
+                }
+            }
+            i++;
+            j++;
+        } while (unique && i < 9 && j < 9);
+    return unique;
     }
 }
