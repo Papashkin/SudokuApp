@@ -31,9 +31,11 @@ public class SudokuCellRenderer extends DefaultTableCellRenderer {
 
             if (!isUnique(table, row, column, (int)value)){
             setForeground(Color.red);
-            } else setForeground(Color.black);
-
-//            if (isSelected) setValue(value);
+            setBackground(Color.white);
+            } else {
+                setForeground(Color.black);
+                setBackground(Color.lightGray);
+            }
 
         setFont(font);
         return this;

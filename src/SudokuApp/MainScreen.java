@@ -124,16 +124,18 @@ public class MainScreen extends JFrame{
         @Override
         public void mouseClicked(MouseEvent e) {
             if (selectedValue != 0){
-                e.getComponent();
                 for (int row = 0; row < gameField.getRowCount();row++){
                     for (int col = 0; col < gameField.getColumnCount();col++){
                         if (gameField.isCellSelected(row,col)){
-                            gameField.setValueAt(selectedValue,row, col);
+                            if (0 == (int)sudoku.getValue(row,col)){
+                                gameField.setValueAt(selectedValue,row, col);
+                                break;
+                            }
                         }
                     }
                 }
             }
-            sudoku.repaint();
+            gameField.repaint();
         }
 
         @Override
