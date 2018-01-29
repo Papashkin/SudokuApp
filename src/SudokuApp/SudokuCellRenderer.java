@@ -27,14 +27,15 @@ public class SudokuCellRenderer extends DefaultTableCellRenderer {
             setHorizontalAlignment(SwingConstants.CENTER);
             if (0 != (int)value){
                 setValue(value);
-            } else value = null;
+            } else setValue(null);
+
             if (!isUnique(table, row, column, (int)value)){
             setForeground(Color.red);
             } else setForeground(Color.black);
+
+//            if (isSelected) setValue(value);
+
         setFont(font);
-        if (isSelected){
-            setForeground(Color.red);
-        } else setForeground(Color.black);
         return this;
     }
 

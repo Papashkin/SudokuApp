@@ -33,7 +33,7 @@ public class MainScreen extends JFrame{
         }
     };
     private int selectedValue = 0;
-    private int lvl = 10;                   // complication level;
+    private int lvl = 10;   // complication level;
     private Sudoku sudoku = new Sudoku(9,9);
 
     private Font bigFont = new Font("Arial", Font.BOLD, 24);
@@ -106,9 +106,7 @@ public class MainScreen extends JFrame{
         @Override
         public void mouseClicked(MouseEvent e) {
             for (int i = 0; i < numberTab.getColumnCount();i++){
-                if (numberTab.isCellSelected(0,i)){
-                    selectedValue = (int) numberTab.getValueAt(0,i);
-                }
+                if (numberTab.isCellSelected(0,i)) selectedValue = (int) numberTab.getValueAt(0,i);
             }
         }
 
@@ -125,6 +123,17 @@ public class MainScreen extends JFrame{
     class SudokuClick implements MouseListener{
         @Override
         public void mouseClicked(MouseEvent e) {
+            if (selectedValue != 0){
+                e.getComponent();
+                for (int row = 0; row < gameField.getRowCount();row++){
+                    for (int col = 0; col < gameField.getColumnCount();col++){
+                        if (gameField.isCellSelected(row,col)){
+                            gameField.setValueAt(selectedValue,row, col);
+                        }
+                    }
+                }
+            }
+            sudoku.repaint();
         }
 
         @Override
@@ -141,6 +150,7 @@ public class MainScreen extends JFrame{
         public void actionPerformed(ActionEvent e){
             numberTab.clearSelection();
             gameField.clearSelection();
+            selectedValue = 0;
             setContentPane(mainPanel);
         }
     }
@@ -161,11 +171,11 @@ public class MainScreen extends JFrame{
                 sudoku.setValue(i,j,aRow[j]);
             }
         }
-
         sudoku.transpose(Math.random());
         sudoku.overturn(Math.random());
         sudoku.swapRowsArea(2);
         sudoku.swapColsArea(2);
+        sudoku.cleanCells(lvl);
 
         for (int row = 0;row < sudoku.rowLength();row++){
             for (int col = 0;col < sudoku.columnLength();col++){
@@ -184,11 +194,6 @@ public class MainScreen extends JFrame{
             outVector[j] = inVector[j+shiftCount];
         }
         return outVector;
-    }
-
-    private boolean isCorrectChoise(JTable table, int aValue){
-        boolean isCorrect = false;
-        return isCorrect;
     }
 
     private void setTableParameters(JTable table, Font aFont){
