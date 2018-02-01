@@ -11,7 +11,6 @@ import java.awt.event.MouseListener;
 public class MainScreen extends JFrame{
 
     private JPanel mainPanel = new JPanel();
-//    private JPanel levelPanel = new JPanel();
     private JPanel gamePanel = new JPanel();
     private JButton start = new JButton("Start");
     private JButton load = new JButton("Load");
@@ -35,6 +34,7 @@ public class MainScreen extends JFrame{
     private int selectedValue = 0;
     private int lvl = 10;   // complication level;
     private Sudoku sudoku = new Sudoku(9,9);
+    private Sudoku solvedSudoku = new Sudoku(9,9);
 
     private Font bigFont = new Font("Arial", Font.BOLD, 24);
     private Font numberFont = new Font("Arial", Font.BOLD, 18);
@@ -90,6 +90,11 @@ public class MainScreen extends JFrame{
                     null,level,10);
             if (lvl == 0 || lvl == 1 || lvl == 2) {
                 generateSudoku(gameField, lvl);
+                for (int row = 0;row < sudoku.rowLength();row++){
+                    for (int col = 0;col < sudoku.columnLength();col++){
+                        gameField.setValueAt(sudoku.getValue(row,col), row,col);
+                    }
+                }
                 gamePanel.repaint();
                 setContentPane(gamePanel);
             }
@@ -105,8 +110,13 @@ public class MainScreen extends JFrame{
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            for (int i = 0; i < numberTab.getColumnCount();i++){
-                if (numberTab.isCellSelected(0,i)) selectedValue = (int) numberTab.getValueAt(0,i);
+            if (e.getClickCount()==2) {
+                selectedValue = 0;
+                numberTab.clearSelection();
+            } else if (e.getClickCount() == 1) {
+                for (int i = 0; i < numberTab.getColumnCount();i++){
+                    if (numberTab.isCellSelected(0,i)) selectedValue = (int) numberTab.getValueAt(0,i);
+                }
             }
         }
 
@@ -123,15 +133,25 @@ public class MainScreen extends JFrame{
     class SudokuClick implements MouseListener{
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (selectedValue != 0){
-                for (int row = 0; row < gameField.getRowCount();row++){
-                    for (int col = 0; col < gameField.getColumnCount();col++){
-                        if (gameField.isCellSelected(row,col)){
-                            if (0 == (int)sudoku.getValue(row,col)){
-                                gameField.setValueAt(selectedValue,row, col);
+            for (int row = 0; row < gameField.getRowCount();row++){
+                for (int col = 0; col < gameField.getColumnCount();col++){
+                    if (gameField.isCellSelected(row,col)){
+                        switch (e.getClickCount()){
+                            case 1:
+                                if (selectedValue != 0) {
+                                    if (0 == (int)sudoku.getValue(row,col)){
+                                        gameField.setValueAt(selectedValue,row, col);
+                                    }
+                                } else {
+                                    if (0 == (int)sudoku.getValue(row,col)) {
+                                        gameField.setValueAt(0,row, col);
+                                    }
+                                }
                                 break;
-                            }
+                            case 2:
+                                gameField.clearSelection();
                         }
+                        break;
                     }
                 }
             }
@@ -177,14 +197,13 @@ public class MainScreen extends JFrame{
         sudoku.overturn(Math.random());
         sudoku.swapRowsArea(2);
         sudoku.swapColsArea(2);
-        sudoku.cleanCells(lvl);
 
-        for (int row = 0;row < sudoku.rowLength();row++){
-            for (int col = 0;col < sudoku.columnLength();col++){
-                table.setValueAt(sudoku.getValue(row,col), row,col);
+        for (int i = 0; i < sudoku.getRowCount();i++){
+            for (int j = 0; j < sudoku.getColumnCount();j++){
+                solvedSudoku.setValue(i,j,sudoku.getValue(i,j));
             }
         }
-        table.repaint();
+        sudoku.cleanCells(lvl);
     }
 
     private int[] shiftLeft (int[] inVector, int shiftCount){      //shift the number vector to the left by shiftCount value
