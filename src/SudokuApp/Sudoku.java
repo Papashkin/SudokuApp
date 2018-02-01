@@ -106,16 +106,55 @@ public class Sudoku extends JTable{
         mBoard = outSudoku.clone();
     }
 
+    public void swapCols (int count){   // Method allows to swap columns in one area
+        int area;
+        int col1, col2;
+        int[][] outSudoku = mBoard.clone();
+        for (int step = 0; step < count; step ++){
+            area = (int)(3*Math.random());
+            area = area*boxSize;
+            col1 = (int)(3*Math.random())+ area;
+            do {
+                col2 = (int)(3*Math.random())+ area;
+            } while (col1 == col2);
+            for (int row = 0; row < mBoard.length;row++){
+                int val = mBoard[row][col1];
+                outSudoku[row][col1] = mBoard[row][col2];
+                outSudoku[row][col2] = val;
+            }
+        }
+        mBoard = outSudoku.clone();
+    }
+
+    public void swapRows (int count){   // Method allows to swap rows in one area
+        int area;
+        int row1, row2;
+        int[][] outSudoku = mBoard.clone();
+        for (int step = 0; step < count; step ++){
+            area = (int)(3*Math.random());
+            area = area*boxSize;
+            row1 = (int)(3*Math.random())+ area;
+            do {
+                row2 = (int)(3*Math.random())+ area;
+            } while (row1 == row2);
+            for (int col = 0; col < mBoard.length;col++){
+                int val = mBoard[row1][col];
+                outSudoku[row1][col] = mBoard[row2][col];
+                outSudoku[row2][col] = val;
+            }
+        }
+        mBoard = outSudoku.clone();
+    }
 
     public void cleanCells(int lvl){        // create well-played game field from the matrix (via random method)
         int filledCells;
         int[] cellValue;
         int i = (int)Math.pow(boardSize,2);
         if (lvl == 0) {
-            filledCells = 35;
+            filledCells = (int)(4*Math.random())+32;
         } else if (lvl ==1){
-            filledCells = 30;
-        } else filledCells = 25;
+            filledCells = (int)(4*Math.random()) + 27;
+        } else filledCells = (int)(4*Math.random()) + 21;
 
         do{
             cellValue = getCellValue();
@@ -128,7 +167,7 @@ public class Sudoku extends JTable{
         }while (i > filledCells);
     }
 
-    private int[] getCellValue(){
+    private int[] getCellValue(){       // Get value from the random not-null cell
        int[] cell = new int[3];
        int val, row, col;
        do {
@@ -143,7 +182,7 @@ public class Sudoku extends JTable{
        return cell;
     }
 
-    private boolean isUniqueSolve (int[] cell){
+    private boolean isUniqueSolve (int[] cell){ // check the solution of the sudoku (must be one solution)
         int aVal;
         int row = cell[0];
         int col = cell[1];
@@ -183,17 +222,4 @@ public class Sudoku extends JTable{
         area[1] = areaIndex[col];
         return  area;
     }
-
-    private int zeroCount(){
-        int count = 0;
-        for (int row = 0;row < boardSize;row++){
-            for (int col = 0;col < 3;col++){
-                if (mBoard[row][col] == 0) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
 }

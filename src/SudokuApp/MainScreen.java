@@ -7,14 +7,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.print.PrinterException;
+import java.text.MessageFormat;
 
 public class MainScreen extends JFrame{
 
     private JPanel mainPanel = new JPanel();
     private JPanel gamePanel = new JPanel();
+    private JPanel addPanel = new JPanel();
     private JButton start = new JButton("Start");
     private JButton load = new JButton("Load");
     private JButton back = new JButton("Back");
+    private JButton bPrint = new JButton("Print");
 
     private DefaultTableModel dtm = new DefaultTableModel(9,9);
     private JTable gameField = new JTable(dtm){
@@ -55,6 +59,9 @@ public class MainScreen extends JFrame{
         setBtnParameters(back,bigFont);
         back.addActionListener(new BackEvent());
 
+        setBtnParameters(bPrint, bigFont);
+        bPrint.addActionListener(new PrintEvent());
+
         setTableParameters(gameField, numberFont);
         gameField.addMouseListener(new SudokuClick());
 
@@ -71,10 +78,13 @@ public class MainScreen extends JFrame{
         mainPanel.setBackground(Color.white);
 
         gamePanel.setLayout(new FlowLayout(FlowLayout.CENTER,0,15));
+        addPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+        addPanel.add(back);
+        addPanel.add(bPrint);
         gamePanel.add(gameField);
         gamePanel.add(number_title);
         gamePanel.add(numberTab);
-        gamePanel.add(back);
+        gamePanel.add(addPanel);
         gamePanel.setBackground(Color.white);
 
         setContentPane(mainPanel);
@@ -103,6 +113,29 @@ public class MainScreen extends JFrame{
 
     class LoadEvent implements ActionListener{
         public void actionPerformed(ActionEvent e){
+        }
+    }
+
+    class BackEvent implements ActionListener{
+        public void actionPerformed(ActionEvent e){
+            numberTab.clearSelection();
+            gameField.clearSelection();
+            selectedValue = 0;
+            setContentPane(mainPanel);
+        }
+    }
+
+    class PrintEvent implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String[] level = {"Easy", "Normal", "Hard"};
+            MessageFormat header = new MessageFormat("Sudoku. " + level[lvl] + " level");
+            MessageFormat footer = new MessageFormat("");
+            try{
+                gameField.print(JTable.PrintMode.FIT_WIDTH, header, footer);
+            } catch (PrinterException pe){
+                JOptionPane.showMessageDialog(null, pe);
+            }
         }
     }
 
@@ -168,19 +201,10 @@ public class MainScreen extends JFrame{
         public void mouseExited(MouseEvent e) { }
     }
 
-    class BackEvent implements ActionListener{
-        public void actionPerformed(ActionEvent e){
-            numberTab.clearSelection();
-            gameField.clearSelection();
-            selectedValue = 0;
-            setContentPane(mainPanel);
-        }
-    }
-
     private void generateSudoku(JTable table, int lvl){
         int columns = table.getColumnCount();
         int rows = table.getRowCount();
-        int[] aRow = {1,2,3,4,5,6,7,8,9};
+        int[] aRow = setFirstRow();
         for (int j = 0; j < columns; j++){
             sudoku.setValue(0,j,aRow[j]);
         }
@@ -197,7 +221,8 @@ public class MainScreen extends JFrame{
         sudoku.overturn(Math.random());
         sudoku.swapRowsArea(2);
         sudoku.swapColsArea(2);
-
+        sudoku.swapRows(5);
+        sudoku.swapCols(5);
         for (int i = 0; i < sudoku.getRowCount();i++){
             for (int j = 0; j < sudoku.getColumnCount();j++){
                 solvedSudoku.setValue(i,j,sudoku.getValue(i,j));
@@ -245,5 +270,31 @@ public class MainScreen extends JFrame{
         button.setBackground(Color.white);
         button.setFont(aFont);
         button.setBorderPainted(false);
+    }
+
+    private int[] setFirstRow(){        // build first row for matrix via random method
+        int rndNum, position;
+        boolean isUniq = true;
+        int i = 0;
+        int[] aVector = new int[9];
+        do{
+            rndNum = (int)(Math.random()*9)+1;        // random value from 1 to 9 including
+            for (int num = 0;num < aVector.length;num++){
+                if (rndNum == aVector[num]){
+                   isUniq = false;
+                   break;
+                }
+            }
+            if (isUniq){
+                do{
+                    position = (int)(Math.random()*9);  // random position in the row
+                }
+                while (aVector[position] != 0);
+                aVector[position] = rndNum;
+                i++;
+            } else isUniq = true;
+        }
+        while (i < aVector.length);
+        return aVector;
     }
 }
