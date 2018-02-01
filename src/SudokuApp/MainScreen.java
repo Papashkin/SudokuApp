@@ -93,7 +93,6 @@ public class MainScreen extends JFrame{
 
     class StartEvent extends Component implements ActionListener{
         public void actionPerformed(ActionEvent e){
-//            Object[] level = {"Easy", "Normal", "Hard"};
             JOptionPane dialogPane = new JOptionPane();
             dialogPane.setLocation(100,200);
             lvl = dialogPane.showOptionDialog(this,"Уровень сложности:",
@@ -129,7 +128,6 @@ public class MainScreen extends JFrame{
     class PrintEvent implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent e) {
-//            String[] level = {"Легкий", "Средний", "Тяжелый"};
             MessageFormat header = new MessageFormat("Судоку. " + level[lvl] + " уровень сложности");
             MessageFormat footer = new MessageFormat(" - s - u - d - o - k - u - ");
             try{
@@ -141,7 +139,6 @@ public class MainScreen extends JFrame{
     }
 
     class NumberChoice implements MouseListener{
-
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount()==2) {
@@ -153,7 +150,6 @@ public class MainScreen extends JFrame{
                 }
             }
         }
-
         @Override
         public void mousePressed(MouseEvent e) { }
         @Override
@@ -172,12 +168,10 @@ public class MainScreen extends JFrame{
                     if (gameField.isCellSelected(row,col)){
                         switch (e.getClickCount()){
                             case 1:
-                                if (selectedValue != 0) {
-                                    if (0 == (int)sudoku.getValue(row,col)){
+                                if (0 == (int)sudoku.getValue(row,col)){
+                                    if (selectedValue != 0) {
                                         gameField.setValueAt(selectedValue,row, col);
-                                    }
-                                } else {
-                                    if (0 == (int)sudoku.getValue(row,col)) {
+                                    } else {
                                         gameField.setValueAt(0,row, col);
                                     }
                                 }
