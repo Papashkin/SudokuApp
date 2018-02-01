@@ -15,10 +15,10 @@ public class MainScreen extends JFrame{
     private JPanel mainPanel = new JPanel();
     private JPanel gamePanel = new JPanel();
     private JPanel addPanel = new JPanel();
-    private JButton start = new JButton("Start");
-    private JButton load = new JButton("Load");
-    private JButton back = new JButton("Back");
-    private JButton bPrint = new JButton("Print");
+    private JButton start = new JButton("Новая игра");
+    private JButton load = new JButton("Продолжить");
+    private JButton back = new JButton("Назад");
+    private JButton bPrint = new JButton("Печать");
 
     private DefaultTableModel dtm = new DefaultTableModel(9,9);
     private JTable gameField = new JTable(dtm){
@@ -39,6 +39,7 @@ public class MainScreen extends JFrame{
     private int lvl = 10;   // complication level;
     private Sudoku sudoku = new Sudoku(9,9);
     private Sudoku solvedSudoku = new Sudoku(9,9);
+    private Object[] level = {"Легкий", "Средний", "Тяжелый"};
 
     private Font bigFont = new Font("Arial", Font.BOLD, 24);
     private Font numberFont = new Font("Arial", Font.BOLD, 18);
@@ -92,11 +93,11 @@ public class MainScreen extends JFrame{
 
     class StartEvent extends Component implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            Object[] level = {"Easy", "Normal", "Hard"};
+//            Object[] level = {"Easy", "Normal", "Hard"};
             JOptionPane dialogPane = new JOptionPane();
             dialogPane.setLocation(100,200);
-            lvl = dialogPane.showOptionDialog(this,"Choose the level",
-                    "Levels",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,
+            lvl = dialogPane.showOptionDialog(this,"Уровень сложности:",
+                    "Сложность",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,
                     null,level,10);
             if (lvl == 0 || lvl == 1 || lvl == 2) {
                 generateSudoku(gameField, lvl);
@@ -128,9 +129,9 @@ public class MainScreen extends JFrame{
     class PrintEvent implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent e) {
-            String[] level = {"Easy", "Normal", "Hard"};
-            MessageFormat header = new MessageFormat("Sudoku. " + level[lvl] + " level");
-            MessageFormat footer = new MessageFormat("");
+//            String[] level = {"Легкий", "Средний", "Тяжелый"};
+            MessageFormat header = new MessageFormat("Судоку. " + level[lvl] + " уровень сложности");
+            MessageFormat footer = new MessageFormat(" - s - u - d - o - k - u - ");
             try{
                 gameField.print(JTable.PrintMode.FIT_WIDTH, header, footer);
             } catch (PrinterException pe){
