@@ -3,12 +3,13 @@ package SudokuApp;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.awt.print.PrinterException;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.text.MessageFormat;
+import java.util.Scanner;
 
 public class MainScreen extends JFrame{
 
@@ -19,6 +20,9 @@ public class MainScreen extends JFrame{
     private JButton load = new JButton("Продолжить");
     private JButton back = new JButton("Назад");
     private JButton bPrint = new JButton("Печать");
+    private File savedSudoku = new File("savedSudoku.txt");
+    private FileReader reader;
+    private FileWriter writer;
 
     private DefaultTableModel dtm = new DefaultTableModel(9,9);
     private JTable gameField = new JTable(dtm){
@@ -36,26 +40,43 @@ public class MainScreen extends JFrame{
         }
     };
     private int selectedValue = 0;
-    private int lvl = 10;   // complication level;
+    private int lvl = 10;
     private Sudoku sudoku = new Sudoku(9,9);
     private Sudoku solvedSudoku = new Sudoku(9,9);
     private Object[] level = {"Легкий", "Средний", "Тяжелый"};
+    private Object[] choise = {"Да","Нет","Отмена"};
+
+    private WindowListener beforeExit;
 
     private Font bigFont = new Font("Arial", Font.BOLD, 24);
     private Font numberFont = new Font("Arial", Font.BOLD, 18);
 
-    MainScreen(){
+    MainScreen() throws Exception {
         setTitle("Sudoku");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(300,445);
-        setLocation(200,100);
+        setLocation(300,150);
         setResizable(false);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                if (gamePanel.isVisible()){
+                    saveToFile();
+                }
+                System.exit(0);
+            }
+        });
 
         setBtnParameters(start, bigFont);
         start.addActionListener(new StartEvent());
 
         setBtnParameters(load,bigFont);
         load.addActionListener(new LoadEvent());
+
+        if (savedSudoku.isFile()){
+            load.setVisible(true);
+        } else {
+            load.setVisible(false);
+        }
 
         setBtnParameters(back,bigFont);
         back.addActionListener(new BackEvent());
@@ -93,9 +114,16 @@ public class MainScreen extends JFrame{
 
     class StartEvent extends Component implements ActionListener{
         public void actionPerformed(ActionEvent e){
+            try{
+                if (savedSudoku.isFile()){
+                    savedSudoku.delete();
+                };
+            }catch (Exception exс){
+                JOptionPane.showMessageDialog(null,  "Операция не выполнилась :( ");
+            }
             JOptionPane dialogPane = new JOptionPane();
             dialogPane.setLocation(100,200);
-            lvl = dialogPane.showOptionDialog(this,"Уровень сложности:",
+            lvl = dialogPane.showOptionDialog(this,"Выберете уровень сложности:",
                     "Сложность",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,
                     null,level,10);
             if (lvl == 0 || lvl == 1 || lvl == 2) {
@@ -111,17 +139,59 @@ public class MainScreen extends JFrame{
         }
     }
 
-    class LoadEvent implements ActionListener{
-        public void actionPerformed(ActionEvent e){
+    class LoadEvent implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            int count = sudoku.rowLength()*sudoku.columnLength();
+            char[] sSudoku = new char[count];
+            char[] sTable = new char[count];
+            int iSudoku, iTable;
+            try{
+                reader = new FileReader(savedSudoku);
+                Scanner scan = new Scanner(reader);
+                int i = 1;
+                count = 0;
+                while (scan.hasNextLine()){
+                    if (i == 1) {
+                        sSudoku = scan.nextLine().toCharArray();
+                        i++;
+                    } else sTable = scan.nextLine().toCharArray();
+                }
+                reader.close();
+                for (int row = 0;row < sudoku.rowLength();row ++){
+                    for (int col = 0;col < sudoku.columnLength();col++){
+                        iSudoku = sSudoku[count] - '0';     // iSudoku = Character.getNumericValue(sSudoku[count]);
+                        iTable = sTable[count] - '0';       // iTable = Character.getNumericValue(sTable[count]);
+                        sudoku.setValue(row,col,iSudoku);
+                        gameField.setValueAt(iTable,row,col);
+                        count++;
+                    }
+                }
+                gamePanel.repaint();
+                setContentPane(gamePanel);
+            } catch (Exception exc){}
         }
     }
 
-    class BackEvent implements ActionListener{
+    class BackEvent extends Component implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            numberTab.clearSelection();
-            gameField.clearSelection();
-            selectedValue = 0;
-            setContentPane(mainPanel);
+            int answer = -1;
+            String val = new String();
+            JOptionPane returnPane = new JOptionPane();
+            returnPane.setLocation(100,200);
+            answer = returnPane.showOptionDialog(returnPane,"Сохранить?",
+                    "Сохранение",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,
+                    null,choise,10);
+            if (answer == 0 || answer == 1){
+                if (answer == 0){       // save the sudoku and a game grid
+                    saveToFile();
+                }
+                numberTab.clearSelection();
+                gameField.clearSelection();
+                selectedValue = 0;
+                sudoku.erase();
+                mainPanel.repaint();
+                setContentPane(mainPanel);
+            }
         }
     }
 
@@ -185,7 +255,6 @@ public class MainScreen extends JFrame{
             }
             gameField.repaint();
         }
-
         @Override
         public void mousePressed(MouseEvent e) { }
         @Override
@@ -224,6 +293,35 @@ public class MainScreen extends JFrame{
             }
         }
         sudoku.cleanCells(lvl);
+    }
+
+    private void saveToFile(){
+        if (savedSudoku.isFile()){
+            savedSudoku.delete();
+        }
+        String val;
+        try{
+            savedSudoku.createNewFile();
+            writer = new FileWriter(savedSudoku);
+            for(int row = 0;row < sudoku.rowLength();row++){
+                for (int col = 0;col < sudoku.columnLength();col++){
+                    val = sudoku.getValue(row,col).toString();
+                    writer.append(val);
+                }
+            }
+            writer.append('\n');
+            for(int row = 0;row < gameField.getRowCount();row++){
+                for (int col = 0;col < gameField.getColumnCount();col++){
+                    val = gameField.getValueAt(row,col).toString();
+                    writer.append(val);
+                }
+            }
+            writer.close();
+            load.setVisible(true);
+        }catch (Exception exс){
+            JOptionPane.showMessageDialog(null,  "Операция отменена. Попробуйте в другой раз");
+            savedSudoku.delete();
+        }
     }
 
     private int[] shiftLeft (int[] inVector, int shiftCount){      //shift the number vector to the left by shiftCount value
