@@ -43,10 +43,9 @@ public class MainScreen extends JFrame{
     private int lvl = 10;
     private Sudoku sudoku = new Sudoku(9,9);
     private Sudoku solvedSudoku = new Sudoku(9,9);
+
     private Object[] level = {"Легкий", "Средний", "Тяжелый"};
     private Object[] choise = {"Да","Нет","Отмена"};
-
-    private WindowListener beforeExit;
 
     private Font bigFont = new Font("Arial", Font.BOLD, 24);
     private Font numberFont = new Font("Arial", Font.BOLD, 18);
@@ -59,7 +58,13 @@ public class MainScreen extends JFrame{
         setResizable(false);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                if (gamePanel.isVisible()){
+                int count = 0;
+                for (int r = 0;r < sudoku.rowLength();r++){
+                    for (int c = 0;c < sudoku.columnLength();c++){
+                        if (0 != (int)sudoku.getValue(r,c)) count++;
+                    }
+                }
+                if (count != 0){
                     saveToFile();
                 }
                 System.exit(0);
@@ -123,7 +128,7 @@ public class MainScreen extends JFrame{
             }
             JOptionPane dialogPane = new JOptionPane();
             dialogPane.setLocation(100,200);
-            lvl = dialogPane.showOptionDialog(this,"Выберете уровень сложности:",
+            lvl = dialogPane.showOptionDialog(mainPanel,"Выберете уровень сложности:",
                     "Сложность",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,
                     null,level,10);
             if (lvl == 0 || lvl == 1 || lvl == 2) {
@@ -178,7 +183,7 @@ public class MainScreen extends JFrame{
             String val = new String();
             JOptionPane returnPane = new JOptionPane();
             returnPane.setLocation(100,200);
-            answer = returnPane.showOptionDialog(returnPane,"Сохранить?",
+            answer = returnPane.showOptionDialog(gamePanel,"Сохранить?",
                     "Сохранение",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,
                     null,choise,10);
             if (answer == 0 || answer == 1){
@@ -254,6 +259,17 @@ public class MainScreen extends JFrame{
                 }
             }
             gameField.repaint();
+            if (solve()){
+                JOptionPane winnerPane = new JOptionPane();
+                winnerPane.setLocation(100,200);
+                winnerPane.showMessageDialog(gamePanel,"Поздравляем!\n" + "Судоку разгадан.","Поздравляем!",0);
+                numberTab.clearSelection();
+                gameField.clearSelection();
+                selectedValue = 0;
+                sudoku.erase();
+                mainPanel.repaint();
+                setContentPane(mainPanel);
+            }
         }
         @Override
         public void mousePressed(MouseEvent e) { }
@@ -283,10 +299,10 @@ public class MainScreen extends JFrame{
         }
         sudoku.transpose(Math.random());
         sudoku.overturn(Math.random());
-        sudoku.swapRowsArea(2);
-        sudoku.swapColsArea(2);
-        sudoku.swapRows(5);
-        sudoku.swapCols(5);
+        sudoku.swapRowsArea(7);
+        sudoku.swapColsArea(7);
+        sudoku.swapRows(9);
+        sudoku.swapCols(9);
         for (int i = 0; i < sudoku.getRowCount();i++){
             for (int j = 0; j < sudoku.getColumnCount();j++){
                 solvedSudoku.setValue(i,j,sudoku.getValue(i,j));
@@ -390,4 +406,61 @@ public class MainScreen extends JFrame{
         while (i < aVector.length);
         return aVector;
     }
+
+    private boolean solve(){        // check the sudoku's solution.
+        boolean isFinish = false;
+        int count = 0;
+        int solution = 0;
+        for(int row = 0;row < gameField.getRowCount();row++) {
+            for (int col = 0; col < gameField.getColumnCount(); col++) {
+                solvedSudoku.setValue(row, col, gameField.getValueAt(row, col));
+                if (0 == (int) gameField.getValueAt(row, col)) count++;
+            }
+        }
+        if (count == 0) {
+            for(int r = 0;r < solvedSudoku.rowLength();r++){
+                for (int c = 0;c < solvedSudoku.columnLength();c++) {
+                    int val = (int)solvedSudoku.getValue(r, c);
+                    if (!isUniqueSolve(r,c,val)) solution++;
+                }
+            }
+            if (solution == 0) {
+                isFinish = true;
+            }
+        }
+        return  isFinish;
+    }
+
+
+    public boolean isUniqueSolve (int row, int col, int val){ // check the solution of the sudoku (must be one solution)
+        int aVal;
+        int[] area;
+        for (int i = 0; i < solvedSudoku.rowLength(); i++){    // is unique in row
+            aVal = (int) solvedSudoku.getValue(row,i);
+            if (aVal == val && (i != col)){
+                return false;
+            }
+        }
+        for (int i = 0; i < solvedSudoku.columnLength(); i++){    // is unique in column
+            aVal = (int) solvedSudoku.getValue(i, col);
+            if (aVal == val && i != row){
+                return false;
+            }
+        }
+        area = solvedSudoku.getAreaIndex(row, col);          // is unique in box 3x3 area
+        for (int i = 0;i < area.length;i++) {
+            area[i] = area[i] * 3;
+        }
+        for (int i = 0;i < 3;i++){
+            for (int j = 0;j < 3;j++){
+                aVal = (int)solvedSudoku.getValue(area[0]+i, area[1]+i);
+                if (aVal == val && (row != area[0]+i) && (col != area[1]+i)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
 }

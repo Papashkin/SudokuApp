@@ -215,7 +215,7 @@ public class Sudoku extends JTable{
         return true;
     }
 
-    private int[] getAreaIndex (int row, int col) {
+    public int[] getAreaIndex (int row, int col) {
         int[] area = new int[2];
         int[] areaIndex = {0,0,0,1,1,1,2,2,2};
         area[0] = areaIndex[row];
