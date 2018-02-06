@@ -53,7 +53,7 @@ public class MainScreen extends JFrame{
     MainScreen() throws Exception {
         setTitle("Sudoku");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300,445);
+        setSize(300,450);
         setLocation(300,150);
         setResizable(false);
         addWindowListener(new WindowAdapter() {
@@ -431,7 +431,6 @@ public class MainScreen extends JFrame{
         return  isFinish;
     }
 
-
     public boolean isUniqueSolve (int row, int col, int val){ // check the solution of the sudoku (must be one solution)
         int aVal;
         int[] area;
@@ -461,6 +460,4 @@ public class MainScreen extends JFrame{
         }
         return true;
     }
-
-
 }
