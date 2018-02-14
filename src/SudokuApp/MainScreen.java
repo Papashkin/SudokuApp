@@ -266,7 +266,8 @@ public class MainScreen extends JFrame{
             if (solve()){
                 JOptionPane winnerPane = new JOptionPane();
                 winnerPane.setLocation(100,200);
-                winnerPane.showMessageDialog(gamePanel,"Поздравляем!\n" + "Судоку разгадан.","Поздравляем!",0);
+                winnerPane.showMessageDialog(gamePanel,"Поздравляем!\n" + "Судоку разгадан.","Поздравляем!",
+                        JOptionPane.INFORMATION_MESSAGE);
                 numberTab.clearSelection();
                 gameField.clearSelection();
                 selectedValue = 0;
