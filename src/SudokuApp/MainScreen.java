@@ -122,19 +122,20 @@ public class MainScreen extends JFrame{
 
     class StartEvent extends Component implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            try{
-                if (savedSudoku.isFile()){
-                    savedSudoku.delete();
-                };
-            }catch (Exception exс){
-                JOptionPane.showMessageDialog(null,  "Операция не выполнилась :( ");
-            }
             JOptionPane dialogPane = new JOptionPane();
             dialogPane.setLocation(100,200);
             lvl = dialogPane.showOptionDialog(mainPanel,"Выберете уровень сложности:",
                     "Сложность",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,
                     null,level,10);
             if (lvl == 0 || lvl == 1 || lvl == 2) {
+                try{
+                    if (savedSudoku.isFile()){
+                        savedSudoku.delete();
+                    };
+                }catch (Exception exс){
+                    JOptionPane.showMessageDialog(null,  "Операция не выполнилась :( ");
+                }
+                gameField.repaint();
                 generateSudoku(gameField, lvl);
                 for (int row = 0;row < sudoku.rowLength();row++){
                     for (int col = 0;col < sudoku.columnLength();col++){
@@ -192,6 +193,9 @@ public class MainScreen extends JFrame{
             if (answer == 0 || answer == 1){
                 if (answer == 0){       // save the sudoku and a game grid
                     saveToFile();
+                }
+                if (answer == 1){
+                    load.setVisible(false);
                 }
                 numberTab.clearSelection();
                 gameField.clearSelection();
@@ -265,7 +269,8 @@ public class MainScreen extends JFrame{
             if (solve()){
                 JOptionPane winnerPane = new JOptionPane();
                 winnerPane.setLocation(100,200);
-                winnerPane.showMessageDialog(gamePanel,"Поздравляем!\n" + "Судоку разгадан.","Поздравляем!",0);
+                winnerPane.showMessageDialog(gamePanel,"Поздравляем!\n" + "Судоку разгадан.","Поздравляем!",
+                        JOptionPane.INFORMATION_MESSAGE);
                 numberTab.clearSelection();
                 gameField.clearSelection();
                 selectedValue = 0;
@@ -302,10 +307,10 @@ public class MainScreen extends JFrame{
         }
         sudoku.transpose(Math.random());
         sudoku.overturn(Math.random());
-        sudoku.swapRowsArea(7);
-        sudoku.swapColsArea(7);
-        sudoku.swapRows(9);
-        sudoku.swapCols(9);
+        sudoku.swapRowsArea(20);
+        sudoku.swapColsArea(20);
+        sudoku.swapRows(50);
+        sudoku.swapCols(50);
         for (int i = 0; i < sudoku.getRowCount();i++){
             for (int j = 0; j < sudoku.getColumnCount();j++){
                 solvedSudoku.setValue(i,j,sudoku.getValue(i,j));
