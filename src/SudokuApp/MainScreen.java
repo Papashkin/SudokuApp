@@ -53,8 +53,11 @@ public class MainScreen extends JFrame{
     MainScreen() throws Exception {
         setTitle("Sudoku");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Dimension dimension = toolkit.getScreenSize();
         setSize(300,450);
-        setLocation(300,150);
+//        setLocation(300,150);
+        setLocation(dimension.width/2 - 150,dimension.height/2 - 225);
         setResizable(false);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
