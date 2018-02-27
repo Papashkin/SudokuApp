@@ -16,9 +16,7 @@ public class Sudoku extends JTable{
 
     public void erase(){
         for (int i = 0; i < mBoard.length;i++){
-            for (int j = 0; j < mBoard[0].length;j++){
-                mBoard[i][j] = 0;
-            }
+            for (int j = 0; j < mBoard[0].length;j++){ mBoard[i][j] = 0; }
         }
     }
 
@@ -151,9 +149,9 @@ public class Sudoku extends JTable{
         int[] cellValue;
         int i = (int)Math.pow(boardSize,2);
         if (lvl == 0) {
-            filledCells = (int)(4*Math.random())+32;
+            filledCells = (int)(4*Math.random())+31;
         } else if (lvl ==1){
-            filledCells = (int)(4*Math.random()) + 27;
+            filledCells = (int)(4*Math.random()) + 26;
         } else filledCells = (int)(4*Math.random()) + 21;
 
         do{

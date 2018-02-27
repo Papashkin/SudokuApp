@@ -43,7 +43,7 @@ public class SudokuCellRenderer extends DefaultTableCellRenderer {
         return this;
     }
 
-    public SudokuCellRenderer(int column, int row, int value){
+    public SudokuCellRenderer(){
     }
 
     private boolean isUnique (JTable table, int row, int col, int value){
